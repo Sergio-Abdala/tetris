@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>tetris versão 5 lRev</title>
+	<title>tetris versão 7 zRev</title>
 	<style type="text/css">
 		#campo{
 			text-align: center;
@@ -57,6 +57,13 @@
 		.laranja{
 			background-color: #FF4500;
 		}
+		p#pause{
+			position: absolute;
+			margin-left: 35%;
+			margin-top: 30%;
+			font-size: 50px;
+			display: none;
+		}
 	</style>
 </head>
 <body>	
@@ -67,14 +74,19 @@
 		<button id="t">t</button>
 		<button id="l">l</button>
 		<button id="lRev">lRev</button>
+		<button id="z">z</button>
+		<button id="zRev">zRev</button>
 	</div>
+	<p id="pause">PAUSE</p>
 	<div id="campo"></div>
 <script type="text/javascript">
 	//(function(){ // essa bosta crasheou tudo
 		let t = new Tetris();
 		t.ini();
+		t.novo();
 		window.addEventListener('keydown', function(e){
 				var key = e.keyCode;
+				console.log(key);
 				//alert(key);
 				switch(key){
 					case 13:
@@ -94,9 +106,22 @@
 						t.dir();
 						break;
 					case 40:
-						console.log('preciona baixo');
 						//document.getElementById('painel').innerHTML = '<p>DOWN</p>';						
 						t.tempo = 10;
+						break;
+					case 80: // p
+						if (t.pause) {
+							t.pause = false;
+						}else{
+							t.pause = true;
+						}
+						break;
+					case 84: // t
+						if (t.trapassa) {
+							t.trapassa = false;
+						}else{
+							t.trapassa = true;
+						}
 						break;
 				}
 			}, false);
@@ -114,7 +139,6 @@
 						//document.getElementById('painel').innerHTML = '<p>...</p>';
 						break;
 					case 40:
-						console.log('solta baixo');
 						//document.getElementById('painel').innerHTML = '<p>...</p>';
 						t.tempo = 1000;
 						break;
@@ -125,20 +149,24 @@
 		document.getElementById('t').addEventListener('click', function(){ t.apaga(); t.peca = 't'; });
 		document.getElementById('l').addEventListener('click', function(){  t.apaga(); t.peca = 'l'; });
 		document.getElementById('lRev').addEventListener('click', function(){  t.apaga(); t.peca = 'lRev'; });
+		document.getElementById('z').addEventListener('click', function(){ t.apaga(); t.peca = 'z'; });
+		document.getElementById('zRev').addEventListener('click', function(){ t.apaga(); t.peca = 'zRev'; });
 		//document.getElementById('').addEventListener('click', function(){});
 	//}()); // essa bosta crasheou tudo
 	// FUNÇÃO CONSTRUTORA
 	function Tetris(){
 		//variaveis
-			this.l = 0;
-			this.c = 4;
-			this.peca = 'linha';
-			this.posi = 0;
+			this.l;
+			this.c;
+			this.peca;
+			this.posi; // this.novo() preenche essas variaveis...
+			this.pause = false;
 			this.lar = 10;
 			this.alt = 25;
 			this.tempo = 100;
 			this.cor = 2;
 			this.campo = new Array();
+			this.fila = new Array();
 		// procedimentos
 		this.ini = function (){ // zerar tudo
 			for(let k=0 ; k < this.alt ; k++){
@@ -151,6 +179,8 @@
 		this.novo = function(){
 			this.l=0;
 			this.c=4;
+			this.sorteia();
+			this.apaga();
 			this.apagaLinha();
 			if (this.campo[this.l+2][this.c] != 0) {
 				alert('fim de jogo');
@@ -158,11 +188,70 @@
 				this.tempo = 100000;
 			}
 		}
+		this.sorteia = function(){
+			let cont = this.fila.length;
+			while(this.fila.length < 3){
+				this.fila[cont] = new Array();
+				let pc = Math.floor((Math.random() * 6) + 0);
+				switch(pc){
+					case 0:
+						this.fila[cont]['peca'] = 'quadrado';
+						break;
+					case 1:
+						this.fila[cont]['peca'] = 'linha';
+						break;
+					case 2:
+						this.fila[cont]['peca'] = 'z';
+						break;
+					case 3:
+						this.fila[cont]['peca'] = 'zRev';
+						break;
+					case 4:
+						this.fila[cont]['peca'] = 't';
+						break;
+					case 5:
+						this.fila[cont]['peca'] = 'l';
+						break;
+					case 6:
+						this.fila[cont]['peca'] = 'lRev';
+						break;
+				}
+				this.fila[cont]['cor'] = Math.floor((Math.random() * 7) + 1);
+				this.fila[cont]['posi'] = Math.floor((Math.random() * 4) + 0);
+				cont++;
+			}
+			let temporario = this.fila[2];
+			this.fila.unshift(temporario);
+			this.fila.pop();
+			//this.cor = Math.floor((Math.random() * 7) + 1);
+			//this.posi = Math.floor((Math.random() * 4) + 0);
+			this.peca = this.fila[2]['peca'];
+			this.cor = this.fila[2]['cor'];
+			this.posi = this.fila[2]['posi'];
+			this.fila.pop();
+			//console.log('peca: '+this.fila[0]['peca']+' zero');
+			console.log('proxima peca: '+this.fila[1]['peca']+' depois: '+this.fila[0]['peca']);
+
+		}
 		this.repetir = function(){
-			this.render();
-			this.desce();
+			if (this.pause) {
+				document.getElementById('pause').style.display = 'inline-block';
+				document.getElementById('campo').innerHTML = '';
+				for(let k=0 ; k < this.alt-1 ; k++){
+					for(let u=0 ; u < this.lar ; u++){
+						document.getElementById('campo').innerHTML += '<div class="vazio"></div>';
+					}
+					document.getElementById('campo').innerHTML += '<br />';
+				}			
+			}else{
+				document.getElementById('pause').style.display = 'none';
+				this.render();
+				if (!this.trapassa) {
+					this.desce();
+				}
+			}
 			document.getElementById('velocidade').innerHTML = this.tempo;
-			setTimeout(function(){ t.repetir(); }, this.tempo);			
+			setTimeout(function(){ t.repetir(); }, this.tempo);	
 		}
 		this.render = function(){
 			document.getElementById('campo').innerHTML = '';
@@ -205,13 +294,13 @@
 			}			
 		}
 		this.desenha = function(){ // PREENCHE A MATRIZ... isto é as peças!!!
+			let tposi = this.posi % 2;
 			switch (this.peca){
 				case 'quadrado':
 					this.campo[this.l][this.c] = this.cor;	this.campo[this.l][this.c+1] = this.cor;
 					this.campo[this.l+1][this.c] = this.cor;	this.campo[this.l+1][this.c+1] = this.cor;
 					break;
-				case 'linha':
-					let tposi = this.posi % 2;
+				case 'linha':					
 					switch(tposi){
 						case 0:
 							this.campo[this.l][this.c-1] = this.cor;	this.campo[this.l][this.c] = this.cor; this.campo[this.l][this.c+1] = this.cor;	this.campo[this.l][this.c+2] = this.cor;
@@ -221,6 +310,33 @@
 							this.campo[this.l+1][this.c] = this.cor;
 							this.campo[this.l+2][this.c] = this.cor;
 							this.campo[this.l+3][this.c] = this.cor;
+							break;
+					}
+					break;
+				case 'z':
+					switch(tposi){
+						case 0:
+							this.campo[this.l][this.c-1] = this.cor;	this.campo[this.l][this.c] = this.cor;
+																		this.campo[this.l+1][this.c] = this.cor;	this.campo[this.l+1][this.c+1] = this.cor;
+							break;
+						case 1:
+																		this.campo[this.l][this.c+1] = this.cor;
+							this.campo[this.l+1][this.c] = this.cor;	this.campo[this.l+1][this.c+1] = this.cor;
+							this.campo[this.l+2][this.c] = this.cor;
+							break;
+					}
+					break;
+				case 'zRev':
+					switch(tposi){
+						case 0:
+																		this.campo[this.l][this.c] = this.cor; this.campo[this.l][this.c+1] = this.cor;
+							this.campo[this.l+1][this.c-1] = this.cor;	this.campo[this.l+1][this.c] = this.cor;
+							
+							break;
+						case 1:
+							this.campo[this.l][this.c] = this.cor;
+							this.campo[this.l+1][this.c] = this.cor;	this.campo[this.l+1][this.c+1] = this.cor;
+																		this.campo[this.l+2][this.c+1] = this.cor;
 							break;
 					}
 					break;
@@ -293,13 +409,13 @@
 			}
 		}
 		this.apaga = function(){
+			let tposi = this.posi % 2;
 			switch (this.peca){
 				case 'quadrado':
 					this.campo[this.l][this.c] = 0;	this.campo[this.l][this.c+1] = 0;
 					this.campo[this.l+1][this.c] = 0;	this.campo[this.l+1][this.c+1] = 0;
 					break;
 				case 'linha':
-					let tposi = this.posi % 2;
 					switch(tposi){
 						case 0:
 							this.campo[this.l][this.c-1] = 0;	this.campo[this.l][this.c] = 0; this.campo[this.l][this.c+1] = 0;	this.campo[this.l][this.c+2] = 0;
@@ -309,6 +425,33 @@
 							this.campo[this.l+1][this.c] = 0;
 							this.campo[this.l+2][this.c] = 0;
 							this.campo[this.l+3][this.c] = 0;
+							break;
+					}
+					break;
+				case 'z':
+					switch(tposi){
+						case 0:
+							this.campo[this.l][this.c-1] = 0;	this.campo[this.l][this.c] = 0;
+																		this.campo[this.l+1][this.c] = 0;	this.campo[this.l+1][this.c+1] = 0;
+							break;
+						case 1:
+																this.campo[this.l][this.c+1] = 0;
+							this.campo[this.l+1][this.c] = 0;	this.campo[this.l+1][this.c+1] = 0;
+							this.campo[this.l+2][this.c] = 0;
+							break;
+					}
+					break;
+				case 'zRev':
+					switch(tposi){
+						case 0:
+																		this.campo[this.l][this.c] = 0; this.campo[this.l][this.c+1] = 0;
+							this.campo[this.l+1][this.c-1] = 0;	this.campo[this.l+1][this.c] = 0;
+							
+							break;
+						case 1:
+							this.campo[this.l][this.c] = 0;
+							this.campo[this.l+1][this.c] = 0;	this.campo[this.l+1][this.c+1] = 0;
+																this.campo[this.l+2][this.c+1] = 0;
 							break;
 					}
 					break;
@@ -381,6 +524,7 @@
 			}					
 		}
 		this.desce = function(){
+			let tposi = this.posi % 2;
 			switch (this.peca){
 				case 'quadrado':
 					if(this.campo[this.l+2][this.c] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.l < this.alt-3){
@@ -391,8 +535,7 @@
 						this.novo();
 					}
 					break;
-				case 'linha':
-					let tposi = this.posi % 2;
+				case 'linha':					
 					switch(tposi){
 						case 0:
 							if(this.campo[this.l+1][this.c-1] === 0	&& this.campo[this.l+1][this.c] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.l < this.alt-2){
@@ -410,6 +553,54 @@
 								this.desenha();
 							}else{
 								this.novo();
+							}
+							break;
+					}
+					break;
+				case 'z':
+					//this.desenha();
+					switch(tposi){
+						case 0:
+							if(this.campo[this.l+1][this.c-1] === 0 && this.campo[this.l+2][this.c] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.l < this.alt-3) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+
+							}
+							break;
+						case 1:
+							if(this.campo[this.l+3][this.c] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.l < this.alt-4) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+
+							}
+							break;
+					}
+					break;
+				case 'zRev':
+					switch(tposi){
+						case 0:
+							if(this.campo[this.l+2][this.c-1] === 0 && this.campo[this.l+2][this.c] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.l < this.alt-3) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}			
+							break;
+						case 1:
+							if(this.campo[this.l+2][this.c] === 0 && this.campo[this.l+3][this.c+1] === 0 && this.l < this.alt-4) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+
 							}
 							break;
 					}
@@ -540,6 +731,7 @@
 			}
 		}
 		this.dir = function(){ // -->
+			let tposi = this.posi % 2;
 			switch (this.peca){
 				case 'quadrado':
 					if(this.campo[this.l][this.c+2] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.c < this.lar-1){
@@ -549,8 +741,7 @@
 						this.render();
 					}
 					break;
-				case 'linha':
-					let tposi = this.posi % 2;
+				case 'linha':					
 					switch(tposi){
 						case 0:
 							if(this.campo[this.l][this.c+3] === 0 && this.c < this.lar-3){
@@ -562,6 +753,46 @@
 							break;
 						case 1:
 							if(this.campo[this.l][this.c+1] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.campo[this.l+3][this.c+1] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+				case 'z':
+					switch(tposi){
+						case 0:
+							if(this.campo[this.l][this.c+1] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+							if(this.campo[this.l][this.c+2] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+				case 'zRev':
+					switch(tposi){
+						case 0:
+							if(this.campo[this.l][this.c+2] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}							
+							break;
+						case 1:
+							if(this.campo[this.l][this.c+1] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.campo[this.l+2][this.c+2] === 0 && this.c < this.lar-2){
 								this.apaga();
 								this.c++;
 								this.desenha();
@@ -683,6 +914,7 @@
 			}
 		}
 		this.esq = function(){
+			let tposi = this.posi % 2;
 			switch (this.peca){
 				case 'quadrado':
 					if (this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.c > 0) {
@@ -692,8 +924,7 @@
 						this.render();
 					}
 					break;
-				case 'linha':
-					let tposi = this.posi % 2;
+				case 'linha':					
 					switch(tposi){
 						case 0:
 							if(this.campo[this.l][this.c-2] === 0 && this.c > 1){
@@ -705,6 +936,46 @@
 							break;
 						case 1:
 							if(this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.campo[this.l+2][this.c-1] === 0 && this.campo[this.l+3][this.c-1] === 0 && this.c > 0){
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+				case 'z':
+					switch(tposi){
+						case 0:
+							if(this.campo[this.l][this.c-2] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.c > 1){
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+						if(this.campo[this.l][this.c] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.campo[this.l+2][this.c-1] === 0 && this.c > 0){
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+				case 'zRev':
+					switch(tposi){
+						case 0:
+							if(this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-2] === 0 && this.c > 0){
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+							if(this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.campo[this.l+2][this.c] === 0 && this.c > 0){
 								this.apaga();
 								this.c--;
 								this.desenha();
@@ -856,6 +1127,14 @@
 				this.c -= 2;
 			}
 			if (this.peca == 'linha' && this.posi == 1 && this.c < 5) {
+				this.apaga();
+				this.c++;
+			}
+			if (this.peca == 'z' && this.posi == 1 && this.c < 5) {
+				this.apaga();
+				this.c++;
+			}
+			if (this.peca == 'zRev' && this.posi == 1 && this.c < 5) {
 				this.apaga();
 				this.c++;
 			}
