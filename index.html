@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>tetris versão 5 lRev</title>
+	<style type="text/css">
+		#campo{
+			text-align: center;
+		}
+		.pausa{
+			position: absolute;
+			margin-left: 45%;
+			margin-top: 20%;
+		}
+		i#pau{
+			font-size: 38px;
+		}
+		.cubo{
+			width: 20px;
+			height: 20px;
+		}
+		.vazio{
+			background-color: #ebebeb;
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			border: solid 1px #ebebeb;
+			margin-bottom: -2px;
+			margin-top: -2px;
+			overflow: hidden;
+		}
+		.peca{
+			background-color: #000;
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			border: solid 1px #fff;
+			margin-bottom: -2px;
+			margin-top: -2px;
+			overflow: hidden;
+		}
+		.vermelho{
+			background-color: #f00;
+		}
+		.verde{
+			background-color: #0f0;
+		}
+		.azul{
+			background-color: #00f;
+		}
+		.amarelo{
+			background-color: #FFFF00;
+		}
+		.rosa{
+			background-color: #FF69B4;
+		}
+		.laranja{
+			background-color: #FF4500;
+		}
+	</style>
+</head>
+<body>	
+	<div id="cabecalho">
+		<b>Speed: <i id="velocidade"></i></b> &nbsp;&nbsp;
+		<button id="quadrado">quadrado</button>
+		<button id="linha">linha</button>
+		<button id="t">t</button>
+		<button id="l">l</button>
+		<button id="lRev">lRev</button>
+	</div>
+	<div id="campo"></div>
+<script type="text/javascript">
+	//(function(){ // essa bosta crasheou tudo
+		let t = new Tetris();
+		t.ini();
+		window.addEventListener('keydown', function(e){
+				var key = e.keyCode;
+				//alert(key);
+				switch(key){
+					case 13:
+						
+						break
+					case 32:
+						//espaço
+						t.girar();
+						break;
+					case 37:
+						t.esq();
+						break;
+					case 38:
+						//document.getElementById('painel').innerHTML = '<p>UP</p>';						
+						break;
+					case 39:
+						t.dir();
+						break;
+					case 40:
+						console.log('preciona baixo');
+						//document.getElementById('painel').innerHTML = '<p>DOWN</p>';						
+						t.tempo = 10;
+						break;
+				}
+			}, false);
+		window.addEventListener('keyup', function(e){
+				var key = e.keyCode;
+				//alert('-->'+normal);
+				switch(key){
+					case 37:
+						//document.getElementById('painel').innerHTML = '<p>...</p>';
+						break;
+					case 38:
+						//document.getElementById('painel').innerHTML = '<p>...</p>';
+						break;
+					case 39:
+						//document.getElementById('painel').innerHTML = '<p>...</p>';
+						break;
+					case 40:
+						console.log('solta baixo');
+						//document.getElementById('painel').innerHTML = '<p>...</p>';
+						t.tempo = 1000;
+						break;
+				}
+			}, false);
+		setTimeout(function(){ t.repetir(); }, t.tempo);		
+		document.getElementById('quadrado').addEventListener('click', function(){ t.apaga(); t.peca = 'quadrado'; });
+		document.getElementById('t').addEventListener('click', function(){ t.apaga(); t.peca = 't'; });
+		document.getElementById('l').addEventListener('click', function(){  t.apaga(); t.peca = 'l'; });
+		document.getElementById('lRev').addEventListener('click', function(){  t.apaga(); t.peca = 'lRev'; });
+		//document.getElementById('').addEventListener('click', function(){});
+	//}()); // essa bosta crasheou tudo
+	// FUNÇÃO CONSTRUTORA
+	function Tetris(){
+		//variaveis
+			this.l = 0;
+			this.c = 4;
+			this.peca = 'linha';
+			this.posi = 0;
+			this.lar = 10;
+			this.alt = 25;
+			this.tempo = 100;
+			this.cor = 2;
+			this.campo = new Array();
+		// procedimentos
+		this.ini = function (){ // zerar tudo
+			for(let k=0 ; k < this.alt ; k++){
+				this.campo[k] = new Array();
+				for(let u=0 ; u < this.lar ; u++){
+					this.campo[k][u] = 0;
+				}
+			}
+		}
+		this.novo = function(){
+			this.l=0;
+			this.c=4;
+			this.apagaLinha();
+			if (this.campo[this.l+2][this.c] != 0) {
+				alert('fim de jogo');
+				//this.ini();
+				this.tempo = 100000;
+			}
+		}
+		this.repetir = function(){
+			this.render();
+			this.desce();
+			document.getElementById('velocidade').innerHTML = this.tempo;
+			setTimeout(function(){ t.repetir(); }, this.tempo);			
+		}
+		this.render = function(){
+			document.getElementById('campo').innerHTML = '';
+			for(let k=0 ; k < this.alt-1 ; k++){
+				for(let u=0 ; u < this.lar ; u++){
+					switch (this.campo[k][u]){
+						case 0:
+							document.getElementById('campo').innerHTML += '<div class="vazio"></div>';
+						break;
+						case 1:
+							document.getElementById('campo').innerHTML += '<div class="peca"></div>';
+						break;
+						case 2:
+							document.getElementById('campo').innerHTML += '<div class="peca vermelho"></div>';
+						break;
+						case 3:
+							document.getElementById('campo').innerHTML += '<div class="peca verde"></div>';
+						break;
+						case 4:
+							document.getElementById('campo').innerHTML += '<div class="peca azul"></div>';
+						break;
+						case 5:
+							document.getElementById('campo').innerHTML += '<div class="peca amarelo"></div>';
+						break;
+						case 6:
+							document.getElementById('campo').innerHTML += '<div class="peca rosa"></div>';
+						break;
+						case 7:
+							document.getElementById('campo').innerHTML += '<div class="peca laranja"></div>';
+						break;
+						case 171:
+							document.getElementById('campo').innerHTML += '<div class="vazio"><img src="img/fogo.gif" class="cubo"></div>';
+						break;
+						default:
+							document.getElementById('campo').innerHTML += '<div class="vazio">?</div>';
+						break;
+					}
+				}
+				document.getElementById('campo').innerHTML += '<br />';
+			}			
+		}
+		this.desenha = function(){ // PREENCHE A MATRIZ... isto é as peças!!!
+			switch (this.peca){
+				case 'quadrado':
+					this.campo[this.l][this.c] = this.cor;	this.campo[this.l][this.c+1] = this.cor;
+					this.campo[this.l+1][this.c] = this.cor;	this.campo[this.l+1][this.c+1] = this.cor;
+					break;
+				case 'linha':
+					let tposi = this.posi % 2;
+					switch(tposi){
+						case 0:
+							this.campo[this.l][this.c-1] = this.cor;	this.campo[this.l][this.c] = this.cor; this.campo[this.l][this.c+1] = this.cor;	this.campo[this.l][this.c+2] = this.cor;
+							break;
+						case 1:
+							this.campo[this.l][this.c] = this.cor;
+							this.campo[this.l+1][this.c] = this.cor;
+							this.campo[this.l+2][this.c] = this.cor;
+							this.campo[this.l+3][this.c] = this.cor;
+							break;
+					}
+					break;
+				case 't':
+					switch (this.posi){
+						case 0:
+							this.campo[this.l][this.c-1] = this.cor;	this.campo[this.l][this.c] = this.cor;	this.campo[this.l][this.c+1] = this.cor;
+																this.campo[this.l+1][this.c] = this.cor;
+							break;
+						case 1:
+							this.campo[this.l][this.c] = this.cor;
+							this.campo[this.l+1][this.c] = this.cor;	this.campo[this.l+1][this.c+1] = this.cor;
+							this.campo[this.l+2][this.c] = this.cor;
+							break;
+						case 2:
+																this.campo[this.l][this.c] = this.cor;
+							this.campo[this.l+1][this.c-1] = this.cor;	this.campo[this.l+1][this.c] = this.cor;	this.campo[this.l+1][this.c+1] = this.cor;
+							break;
+						case 3:
+																this.campo[this.l][this.c] = this.cor;
+							this.campo[this.l+1][this.c-1] = this.cor;	this.campo[this.l+1][this.c] = this.cor;
+																this.campo[this.l+2][this.c] = this.cor;
+							break;
+					}
+					break;
+				case 'l':
+					switch (this.posi){
+						case 0:
+							this.campo[this.l][this.c] = this.cor;
+							this.campo[this.l+1][this.c] = this.cor;
+							this.campo[this.l+2][this.c] = this.cor;	this.campo[this.l+2][this.c+1] = this.cor;
+							break;
+						case 1:
+																							this.campo[this.l][this.c] = this.cor;
+							this.campo[this.l+1][this.c-2] = this.cor;	this.campo[this.l+1][this.c-1] = this.cor;	this.campo[this.l+1][this.c] = this.cor;
+							break;
+						case 2:
+							this.campo[this.l][this.c] = this.cor;	this.campo[this.l][this.c+1] = this.cor;
+															this.campo[this.l+1][this.c+1] = this.cor;
+															this.campo[this.l+2][this.c+1] = this.cor;
+							break;
+						case 3:
+							this.campo[this.l][this.c] = this.cor;	this.campo[this.l][this.c+1] = this.cor;	this.campo[this.l][this.c+2] = this.cor;
+							this.campo[this.l+1][this.c] = this.cor;
+							break;
+					}
+					break;
+				case 'lRev':
+					switch(this.posi){
+						case 0:
+																this.campo[this.l][this.c] = this.cor;
+																this.campo[this.l+1][this.c] = this.cor;
+							this.campo[this.l+2][this.c-1] = this.cor;	this.campo[this.l+2][this.c] = this.cor;
+							break;
+						case 1:
+							this.campo[this.l][this.c-1] = this.cor;	this.campo[this.l][this.c] = this.cor;	this.campo[this.l][this.c+1] = this.cor;
+																								this.campo[this.l+1][this.c+1] = this.cor;
+							break;
+						case 2:
+							this.campo[this.l][this.c] = this.cor;	this.campo[this.l][this.c+1] = this.cor;
+							this.campo[this.l+1][this.c] = this.cor;
+							this.campo[this.l+2][this.c] = this.cor;
+							break;
+						case 3:
+							this.campo[this.l][this.c-1] = this.cor;
+							this.campo[this.l+1][this.c-1] = this.cor;	this.campo[this.l+1][this.c] = this.cor;	this.campo[this.l+1][this.c+1] = this.cor;
+							break;
+					}
+					break;
+			}
+		}
+		this.apaga = function(){
+			switch (this.peca){
+				case 'quadrado':
+					this.campo[this.l][this.c] = 0;	this.campo[this.l][this.c+1] = 0;
+					this.campo[this.l+1][this.c] = 0;	this.campo[this.l+1][this.c+1] = 0;
+					break;
+				case 'linha':
+					let tposi = this.posi % 2;
+					switch(tposi){
+						case 0:
+							this.campo[this.l][this.c-1] = 0;	this.campo[this.l][this.c] = 0; this.campo[this.l][this.c+1] = 0;	this.campo[this.l][this.c+2] = 0;
+							break;
+						case 1:
+							this.campo[this.l][this.c] = 0;
+							this.campo[this.l+1][this.c] = 0;
+							this.campo[this.l+2][this.c] = 0;
+							this.campo[this.l+3][this.c] = 0;
+							break;
+					}
+					break;
+				case 't':
+					switch (this.posi){
+						case 0:
+							this.campo[this.l][this.c-1] = 0;	this.campo[this.l][this.c] = 0;	this.campo[this.l][this.c+1] = 0;
+																this.campo[this.l+1][this.c] = 0;
+							break;
+						case 1:
+							this.campo[this.l][this.c] = 0;
+							this.campo[this.l+1][this.c] = 0;	this.campo[this.l+1][this.c+1] = 0;
+							this.campo[this.l+2][this.c] = 0;
+							break;
+						case 2:
+																this.campo[this.l][this.c] = 0;
+							this.campo[this.l+1][this.c-1] = 0;	this.campo[this.l+1][this.c] = 0;	this.campo[this.l+1][this.c+1] = 0;
+							break;
+						case 3:
+																this.campo[this.l][this.c] = 0;
+							this.campo[this.l+1][this.c-1] = 0;	this.campo[this.l+1][this.c] = 0;
+																this.campo[this.l+2][this.c] = 0;
+							break;
+					}
+					break;
+				case 'l':
+					switch (this.posi){
+						case 0:
+							this.campo[this.l][this.c] = 0;
+							this.campo[this.l+1][this.c] = 0;
+							this.campo[this.l+2][this.c] = 0;	this.campo[this.l+2][this.c+1] = 0;
+							break;
+						case 1:
+																							this.campo[this.l][this.c] = 0;
+							this.campo[this.l+1][this.c-2] = 0;	this.campo[this.l+1][this.c-1] = 0;	this.campo[this.l+1][this.c] = 0;
+							break;
+						case 2:
+							this.campo[this.l][this.c] = 0;	this.campo[this.l][this.c+1] = 0;
+															this.campo[this.l+1][this.c+1] = 0;
+															this.campo[this.l+2][this.c+1] = 0;
+							break;
+						case 3:
+							this.campo[this.l][this.c] = 0;	this.campo[this.l][this.c+1] = 0;	this.campo[this.l][this.c+2] = 0;
+							this.campo[this.l+1][this.c] = 0;
+							break;
+					}
+					break;
+				case 'lRev':
+					switch(this.posi){
+						case 0:
+																this.campo[this.l][this.c] = 0;
+																this.campo[this.l+1][this.c] = 0;
+							this.campo[this.l+2][this.c-1] = 0;	this.campo[this.l+2][this.c] = 0;
+							break;
+						case 1:
+							this.campo[this.l][this.c-1] = 0;	this.campo[this.l][this.c] = 0;	this.campo[this.l][this.c+1] = 0;
+																								this.campo[this.l+1][this.c+1] = 0;
+							break;
+						case 2:
+							this.campo[this.l][this.c] = 0;	this.campo[this.l][this.c+1] = 0;
+							this.campo[this.l+1][this.c] = 0;
+							this.campo[this.l+2][this.c] = 0;
+							break;
+						case 3:
+							this.campo[this.l][this.c-1] = 0;
+							this.campo[this.l+1][this.c-1] = 0;	this.campo[this.l+1][this.c] = 0;	this.campo[this.l+1][this.c+1] = 0;
+							break;
+					}
+					break;
+			}					
+		}
+		this.desce = function(){
+			switch (this.peca){
+				case 'quadrado':
+					if(this.campo[this.l+2][this.c] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.l < this.alt-3){
+						this.apaga();
+						this.l++;
+						this.desenha();
+					}else{
+						this.novo();
+					}
+					break;
+				case 'linha':
+					let tposi = this.posi % 2;
+					switch(tposi){
+						case 0:
+							if(this.campo[this.l+1][this.c-1] === 0	&& this.campo[this.l+1][this.c] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.l < this.alt-2){
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+						case 1:
+							if(this.campo[this.l+4][this.c] === 0 && this.l < this.alt-5) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+					}
+					break;
+				case 't':
+					switch (this.posi){
+						case 0:
+							if (this.campo[this.l+1][this.c-1] === 0 && this.campo[this.l+2][this.c] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.l < this.alt-3) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+
+							}
+							break;
+						case 1:
+							if (this.campo[this.l+3][this.c] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.l < this.alt-4) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+						case 2:
+							if (this.campo[this.l+2][this.c-1] === 0 && this.campo[this.l+2][this.c] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.l < this.alt-3) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+						case 3:
+							if(this.campo[this.l+2][this.c-1] === 0 && this.campo[this.l+3][this.c] === 0 && this.l < this.alt-4) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+					}
+					break;
+				case 'l':
+					switch (this.posi){
+						case 0:
+							if (this.campo[this.l+3][this.c] === 0 && this.campo[this.l+3][this.c+1] === 0 && this.l < this.alt-4) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+						case 1:
+							if (this.campo[this.l+2][this.c-2] === 0 && this.campo[this.l+2][this.c-1] === 0 && this.campo[this.l+2][this.c] === 0 && this.l < this.alt-3) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+						case 2:
+							if (this.campo[this.l+1][this.c] === 0 && this.campo[this.l+3][this.c+1] === 0 && this.l < this.alt-4) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+						case 3:
+							if (this.campo[this.l+2][this.c] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.l < this.alt-3) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							this.campo[this.l][this.c] = this.cor;	this.campo[this.l][this.c+1] = this.cor;	this.campo[this.l][this.c+2] = this.cor;
+							this.campo[this.l+1][this.c] = this.cor;
+							break;
+					}
+					break;
+				case 'lRev':
+					switch(this.posi){
+						case 0:
+							if(this.campo[this.l+3][this.c-1] === 0 && this.campo[this.l+3][this.c] === 0 && this.l < this.alt-4) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+						case 1:
+							if(this.campo[this.l+1][this.c-1] === 0 && this.campo[this.l+1][this.c] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.l < this.alt-3) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+						case 2:
+							if(this.campo[this.l+1][this.c+1] === 0 && this.campo[this.l+3][this.c] === 0 && this.l < this.alt-4) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+						case 3:
+							if(this.campo[this.l+2][this.c-1] === 0 && this.campo[this.l+2][this.c] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.l < this.alt-3) {
+								this.apaga();
+								this.l++;
+								this.desenha();
+							}else{
+								this.novo();
+							}
+							break;
+					}
+					break;
+			}
+		}
+		this.dir = function(){ // -->
+			switch (this.peca){
+				case 'quadrado':
+					if(this.campo[this.l][this.c+2] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.c < this.lar-1){
+						this.apaga();
+						this.c++;
+						this.desenha();
+						this.render();
+					}
+					break;
+				case 'linha':
+					let tposi = this.posi % 2;
+					switch(tposi){
+						case 0:
+							if(this.campo[this.l][this.c+3] === 0 && this.c < this.lar-3){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+							if(this.campo[this.l][this.c+1] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.campo[this.l+3][this.c+1] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+				case 't':
+					switch (this.posi){
+						case 0:
+							if(this.campo[this.l][this.c+2] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+							if (this.campo[this.l][this.c+1] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.c < this.lar-1) {
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 2:
+							if (this.campo[this.l][this.c+1] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.c < this.lar-1) {
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 3:
+							if(this.campo[this.l][this.c+1] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.campo[this.l+2][this.c+1] === 0){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+				case 'l':
+					switch (this.posi){
+						case 0:
+							if(this.campo[this.l][this.c+1] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.campo[this.l+2][this.c+2] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+							if(this.campo[this.l][this.c+1] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 2:
+							if(this.campo[this.l][this.c+2] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.campo[this.l+2][this.c+2] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 3:
+							if(this.campo[this.l][this.c+3] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.c < this.lar-3){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+				case 'lRev':
+					switch(this.posi){
+						case 0:
+							if(this.campo[this.l][this.c+1] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.c < this.lar-1 ){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+							if(this.campo[this.l][this.c+2] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 2:
+							if(this.campo[this.l][this.c+2] === 0 && this.campo[this.l+1][this.c+1] === 0 && this.campo[this.l+2][this.c+1] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 3:
+							if(this.campo[this.l][this.c] === 0 && this.campo[this.l+1][this.c+2] === 0 && this.c < this.lar-1){
+								this.apaga();
+								this.c++;
+								this.desenha();
+								this.render();
+							}
+							this.campo[this.l][this.c-1] = this.cor;
+							this.campo[this.l+1][this.c-1] = this.cor;	this.campo[this.l+1][this.c] = this.cor;	this.campo[this.l+1][this.c+1] = this.cor;
+							break;
+					}
+					break;
+			}
+		}
+		this.esq = function(){
+			switch (this.peca){
+				case 'quadrado':
+					if (this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.c > 0) {
+						this.apaga();
+						this.c--;
+						this.desenha();
+						this.render();
+					}
+					break;
+				case 'linha':
+					let tposi = this.posi % 2;
+					switch(tposi){
+						case 0:
+							if(this.campo[this.l][this.c-2] === 0 && this.c > 1){
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+							if(this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.campo[this.l+2][this.c-1] === 0 && this.campo[this.l+3][this.c-1] === 0 && this.c > 0){
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+				case 't':
+					switch (this.posi){
+						case 0:
+							if(this.campo[this.l][this.c-2] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.c >= 0){
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+							if (this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.campo[this.l+2][this.c-1] === 0 && this.c >= 0) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 2:
+							if (this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-2] === 0 && this.c >= 0) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 3:
+							if (this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-2] === 0 && this.campo[this.l+2][this.c-1] === 0 && this.c >= 0) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+				case 'l':
+					switch (this.posi){
+						case 0:
+							if(this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.campo[this.l+2][this.c-1] === 0 && this.c >= 0) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+							if(this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-3] === 0 && this.c > 2) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 2:
+							if(this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c] === 0 && this.campo[this.l+2][this.c] === 0 && this.c > 0) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 3:
+							if(this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.c > 0) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+				case 'lRev':
+					switch(this.posi){
+						case 0:
+							if(this.campo[this.l][this.c-1] ===0 && this.campo[this.l+1][this.c-1] ===0 && this.campo[this.l+2][this.c-2] ===0 && this.c > 0) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 1:
+							if(this.campo[this.l][this.c-2] === 0 && this.campo[this.l+1][this.c] === 0 && this.c > 1) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 2:
+							if(this.campo[this.l][this.c-1] === 0 && this.campo[this.l+1][this.c-1] === 0 && this.campo[this.l+2][this.c-1] === 0 && this.c > 0) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+						case 3:
+						if(this.campo[this.l][this.c-2] === 0 && this.campo[this.l+1][this.c-2] === 0 && this.c > 0) {
+								this.apaga();
+								this.c--;
+								this.desenha();
+								this.render();
+							}
+							break;
+					}
+					break;
+			}
+		}
+		this.girar = function(){
+			/*let posDois = parseInt(this.posi) + this.cor;
+			console.log(this.posi+' -> '+posDois);*/
+			//REMENDOS PORKOS... isso bem que poderia ser revisto
+			if (this.peca == 't' && this.posi == 1 && this.c < 1) {
+				this.apaga();
+				this.c++;
+			}
+			if (this.peca == 't' && this.posi == 3 && this.c > 8) {
+				this.apaga();
+				this.c--;
+			}
+			if (this.peca == 'l' && (this.posi == 1 || this.posi == 2) && this.c > 7) {
+				this.apaga();
+				this.c--;
+			}
+			if (this.peca == 'l' && this.posi == 0 && this.c < 2) {
+				this.apaga();
+				this.c+=2;
+			}
+			if (this.peca == 'lRev' && this.posi == 0 && this.c >8) {
+				this.apaga();
+				this.c--;
+			}
+			if (this.peca == 'lRev' && this.posi == 2 && this.c < 2) {
+				this.apaga();
+				this.c++;
+			}
+			if (this.peca == 'linha' && this.posi == 1 && this.c > 5) {
+				this.apaga();
+				this.c -= 2;
+			}
+			if (this.peca == 'linha' && this.posi == 1 && this.c < 5) {
+				this.apaga();
+				this.c++;
+			}
+			// fim dos remendos isso bem que poderia ser revisto
+			this.apaga();
+			this.posi++;
+			if (this.posi > 3) {
+				this.posi=0;
+			}			
+			this.desenha();		
+		}
+		this.apagaLinha = function(){
+			let apagar = false;
+			for(let k = 0 ; k < this.alt ; k++){
+				apagar=true;
+				for(let u=0 ; u < this.lar ; u++){
+					if(this.campo[k][u] === 0){
+						apagar = false;
+					}
+				}
+				if(apagar){
+					// AQUI EXISTE LINHA A A SER APAGADA NA POSIÇÃO k
+					for(let kk = k ; kk > 1 ; kk--){
+						for(let u = 0 ; u < this.lar ; u++){
+							this.campo[kk][u] = this.campo[kk-1][u];
+						}
+					}
+					this.render();						
+				}
+			}
+		}
+	}	
+</script>
+</body>
+</html>
