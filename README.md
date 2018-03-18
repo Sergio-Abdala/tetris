@@ -1,2 +1,2 @@
 # tetris
-jogo tetris em javascript - ñ finalizado
+jogo tetris em javascript - funcional mas ñ finalizado
