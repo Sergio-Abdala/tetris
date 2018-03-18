@@ -107,7 +107,7 @@
 						break;
 					case 40:
 						//document.getElementById('painel').innerHTML = '<p>DOWN</p>';						
-						t.tempo = 10;
+						t.tempo = 1;
 						break;
 					case 80: // p
 						if (t.pause) {
@@ -140,7 +140,7 @@
 						break;
 					case 40:
 						//document.getElementById('painel').innerHTML = '<p>...</p>';
-						t.tempo = 1000;
+						t.tempo = t.velocidade;
 						break;
 				}
 			}, false);
@@ -160,11 +160,13 @@
 			this.c;
 			this.peca;
 			this.posi; // this.novo() preenche essas variaveis...
+			this.velocidade = 1000;
 			this.pause = false;
 			this.lar = 10;
 			this.alt = 25;
-			this.tempo = 100;
+			this.tempo = 1000;
 			this.cor = 2;
+			this.contLinhasApagadas = 0;
 			this.campo = new Array();
 			this.fila = new Array();
 		// procedimentos
@@ -231,7 +233,6 @@
 			this.fila.pop();
 			//console.log('peca: '+this.fila[0]['peca']+' zero');
 			console.log('proxima peca: '+this.fila[1]['peca']+' depois: '+this.fila[0]['peca']);
-
 		}
 		this.repetir = function(){
 			if (this.pause) {
@@ -250,7 +251,7 @@
 					this.desce();
 				}
 			}
-			document.getElementById('velocidade').innerHTML = this.tempo;
+			document.getElementById('velocidade').innerHTML = (this.velocidade - 1000) * -1;
 			setTimeout(function(){ t.repetir(); }, this.tempo);	
 		}
 		this.render = function(){
@@ -1157,6 +1158,15 @@
 				}
 				if(apagar){
 					// AQUI EXISTE LINHA A A SER APAGADA NA POSIÇÃO k
+					this.contLinhasApagadas++;
+					if (this.velocidade > 100) {
+						this.velocidade -= 100;
+					}else if(this.velocidade > 10){
+						this.velocidade -= 10;
+					}else if(this.velocidade > 0){
+						this.velocidade -= 1;
+					}
+					
 					for(let kk = k ; kk > 1 ; kk--){
 						for(let u = 0 ; u < this.lar ; u++){
 							this.campo[kk][u] = this.campo[kk-1][u];
