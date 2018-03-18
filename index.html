@@ -64,18 +64,27 @@
 			font-size: 50px;
 			display: none;
 		}
+		#botoes{
+			display: none;
+		}
+		#trapacinha{
+			font-size: 10px;
+			float: right;
+		}
 	</style>
 </head>
 <body>	
 	<div id="cabecalho">
-		<b>Speed: <i id="velocidade"></i></b> &nbsp;&nbsp;
-		<button id="quadrado">quadrado</button>
-		<button id="linha">linha</button>
-		<button id="t">t</button>
-		<button id="l">l</button>
-		<button id="lRev">lRev</button>
-		<button id="z">z</button>
-		<button id="zRev">zRev</button>
+		<b>Speed: <i id="velocidade"></i></b> &nbsp;&nbsp; Pontos: <i id="pontos">0</i> &nbsp;&nbsp; ESPAÇO = girar peça &nbsp;&nbsp; ENTER ou P(p) = PAUSA &nbsp;<small id="trapacinha"> T(t) = trapaça</small>
+		<div id="botoes">
+			<button id="quadrado">quadrado</button>
+			<button id="linha">linha</button>
+			<button id="t">t</button>
+			<button id="l">l</button>
+			<button id="lRev">lRev</button>
+			<button id="z">z</button>
+			<button id="zRev">zRev</button>
+		</div>
 	</div>
 	<p id="pause">PAUSE</p>
 	<div id="campo"></div>
@@ -90,7 +99,15 @@
 				//alert(key);
 				switch(key){
 					case 13:
-						
+						if (t.pause) {
+							t.pause = false;
+						}else{
+							t.pause = true;
+						}
+						if(t.trapassa){
+							t.trapassa = false;
+							document.getElementById('botoes').style.display = 'none';
+						}
 						break
 					case 32:
 						//espaço
@@ -99,14 +116,12 @@
 					case 37:
 						t.esq();
 						break;
-					case 38:
-						//document.getElementById('painel').innerHTML = '<p>UP</p>';						
+					case 38: // UP
 						break;
 					case 39:
 						t.dir();
 						break;
-					case 40:
-						//document.getElementById('painel').innerHTML = '<p>DOWN</p>';						
+					case 40: // DOWN
 						t.tempo = 1;
 						break;
 					case 80: // p
@@ -119,8 +134,10 @@
 					case 84: // t
 						if (t.trapassa) {
 							t.trapassa = false;
+							document.getElementById('botoes').style.display = 'none';
 						}else{
 							t.trapassa = true;
+							document.getElementById('botoes').style.display = 'inline-block';
 						}
 						break;
 				}
@@ -146,6 +163,7 @@
 			}, false);
 		setTimeout(function(){ t.repetir(); }, t.tempo);		
 		document.getElementById('quadrado').addEventListener('click', function(){ t.apaga(); t.peca = 'quadrado'; });
+		document.getElementById('linha').addEventListener('click', function(){ t.apaga(); t.peca = 'linha'; });
 		document.getElementById('t').addEventListener('click', function(){ t.apaga(); t.peca = 't'; });
 		document.getElementById('l').addEventListener('click', function(){  t.apaga(); t.peca = 'l'; });
 		document.getElementById('lRev').addEventListener('click', function(){  t.apaga(); t.peca = 'lRev'; });
@@ -252,6 +270,7 @@
 				}
 			}
 			document.getElementById('velocidade').innerHTML = (this.velocidade - 1000) * -1;
+			document.getElementById('pontos').innerHTML = this.contLinhasApagadas;
 			setTimeout(function(){ t.repetir(); }, this.tempo);	
 		}
 		this.render = function(){
@@ -1166,7 +1185,7 @@
 					}else if(this.velocidade > 0){
 						this.velocidade -= 1;
 					}
-					
+					this.tempo = this.velocidade;
 					for(let kk = k ; kk > 1 ; kk--){
 						for(let u = 0 ; u < this.lar ; u++){
 							this.campo[kk][u] = this.campo[kk-1][u];
