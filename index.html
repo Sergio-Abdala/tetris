@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>tetris versão 7 zRev</title>
+	<title>tetris versão 8 zRev</title>
 	<style type="text/css">
 		#campo{
 			text-align: center;
@@ -39,6 +39,26 @@
 			margin-top: -2px;
 			overflow: hidden;
 		}
+		.vaziozinho{
+			background-color: #fff;
+			display: inline-block;
+			width: 15px;
+			height: 15px;
+			border: solid 1px #fff;
+			overflow: hidden;
+			margin-bottom: -3px;
+			margin-top: -3px;
+		}
+		.pecinha{
+			background-color: green;
+			display: inline-block;
+			width: 15px;
+			height: 15px;
+			border: solid 1px #fff;
+			overflow: hidden;
+			margin-bottom: -3px;
+			margin-top: -3px;
+		}		
 		.vermelho{
 			background-color: #f00;
 		}
@@ -71,6 +91,14 @@
 			font-size: 10px;
 			float: right;
 		}
+		#prox{
+			position: absolute;
+			margin-top: 30px;
+			margin-left: 20%;
+		}
+		b#trapaceiro{
+			color: red;
+		}
 	</style>
 </head>
 <body>	
@@ -84,8 +112,10 @@
 			<button id="lRev">lRev</button>
 			<button id="z">z</button>
 			<button id="zRev">zRev</button>
+			<b id="trapaceiro"> TRAPACEIRO...</b>
 		</div>
 	</div>
+	<div id="prox"></div>
 	<p id="pause">PAUSE</p>
 	<div id="campo"></div>
 <script type="text/javascript">
@@ -169,7 +199,6 @@
 		document.getElementById('lRev').addEventListener('click', function(){  t.apaga(); t.peca = 'lRev'; });
 		document.getElementById('z').addEventListener('click', function(){ t.apaga(); t.peca = 'z'; });
 		document.getElementById('zRev').addEventListener('click', function(){ t.apaga(); t.peca = 'zRev'; });
-		//document.getElementById('').addEventListener('click', function(){});
 	//}()); // essa bosta crasheou tudo
 	// FUNÇÃO CONSTRUTORA
 	function Tetris(){
@@ -202,10 +231,237 @@
 			this.sorteia();
 			this.apaga();
 			this.apagaLinha();
+			this.prox();
 			if (this.campo[this.l+2][this.c] != 0) {
 				alert('fim de jogo');
 				//this.ini();
 				this.tempo = 100000;
+			}
+		}
+		this.prox = function(){
+			document.getElementById('prox').innerHTML = '';
+			for(let k = 0 ; k < this.fila.length ; k++){
+				let posicao = this.fila[k]['posi'] % 2;
+					switch (this.fila[k]['peca']){
+					case 'quadrado':
+						document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+						document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+						document.getElementById('prox').innerHTML += '<br />';
+						document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+						document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+						document.getElementById('prox').innerHTML += '<br />';
+						document.getElementById('prox').innerHTML += '<br />';
+						break;
+					case 'linha':
+						switch (posicao){
+							case 0:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+							case 1:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+						}
+						break;
+					case 'z':
+						switch (posicao){
+							case 0:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+							case 1:
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+						}
+						break;
+					case 'zRev':
+						switch(posicao){
+							case 0:
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+							case 1:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+						}
+						break;
+					case 't':
+						switch (this.fila[k]['posi']){
+							case 0:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+							case 1:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+							case 2:
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+							case 3:
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+						}
+						break;
+					case 'l':
+						switch (this.fila[k]['posi']){
+							case 0:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+							case 1:
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;							
+							case 2:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;							
+							case 3:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+						}
+						break;
+					case 'lRev':
+						switch (this.fila[k]['posi']){
+							case 0:
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+							case 1:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="vaziozinho"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+							case 2:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+							case 3:
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<div class="pecinha"></div>';
+								document.getElementById('prox').innerHTML += '<br />';
+								document.getElementById('prox').innerHTML += '<br />';
+								break;
+						}
+						break;
+				}
 			}
 		}
 		this.sorteia = function(){
@@ -250,7 +506,7 @@
 			this.posi = this.fila[2]['posi'];
 			this.fila.pop();
 			//console.log('peca: '+this.fila[0]['peca']+' zero');
-			console.log('proxima peca: '+this.fila[1]['peca']+' depois: '+this.fila[0]['peca']);
+			console.log('proxima peca: '+this.fila[1]['peca']+' '+this.fila[1]['posi']+' depois: '+this.fila[0]['peca']+' '+this.fila[0]['posi']);
 		}
 		this.repetir = function(){
 			if (this.pause) {
@@ -351,7 +607,6 @@
 						case 0:
 																		this.campo[this.l][this.c] = this.cor; this.campo[this.l][this.c+1] = this.cor;
 							this.campo[this.l+1][this.c-1] = this.cor;	this.campo[this.l+1][this.c] = this.cor;
-							
 							break;
 						case 1:
 							this.campo[this.l][this.c] = this.cor;
