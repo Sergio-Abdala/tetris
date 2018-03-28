@@ -2,7 +2,12 @@
 <html>
 <head>
 	<meta charset="utf-8">
+	<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1" />
 	<title>tetris versão 8 zRev</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="keywords" content="tetris, JavaScript">
+	<meta name="description" content="jogo de tetris totalmente em javascript">
+	<meta name="author" content="Sérgio Abdala">
 	<style type="text/css">
 		#campo{
 			text-align: center;
@@ -102,9 +107,38 @@
 		footer{
 			text-align: center;
 		}
+		div#placar{
+			float: right;
+			margin-top: -500px;
+			margin-right: 150px;
+		}
+		strong{
+			float: right;
+			margin-left: 15px;
+			font-size: 21px;
+			color: #ca44a1;
+		}
+		i{
+			color: #b0ce7a;
+			font-size: 21px;
+
+		}
+		@media only screen and (max-width: 600px) {
+			#prox{
+				position: absolute;
+				margin-top: 30px;
+				margin-left: 1%;
+			}
+			div#placar{
+				float: right;
+				margin-top: -500px;
+				margin-right: 0px;
+			}
+		}
 	</style>
 </head>
 <body>	
+	
 	<div id="cabecalho">
 		<b>Speed: <i id="velocidade"></i></b> &nbsp;&nbsp; Pontos: <i id="pontos">0</i> &nbsp;&nbsp; ESPAÇO = girar peça &nbsp;&nbsp; ENTER ou P(p) = PAUSA &nbsp;<small id="trapacinha"> T(t) = trapaça</small>
 		<div id="botoes">
@@ -118,17 +152,20 @@
 			<b id="trapaceiro"> TRAPACEIRO...</b>
 		</div>
 	</div>
-	<div id="prox"></div>
+	<div id="prox"></div>	
 	<p id="pause">PAUSE</p>
 	<div id="campo"></div>
+	<div id="placar"></div>
 	<footer>
 		&copy; Copyright by Sérgio Abdala - março 2018
 	</footer>
-<script type="text/javascript">
+<script type="text/javascript" charset="utf-8">
 	//(function(){ // essa bosta crasheou tudo
 		let t = new Tetris();
 		t.ini();
 		t.novo();
+		//let dados = new Array();
+		t.placar();
 		window.addEventListener('keydown', function(e){
 				var key = e.keyCode;
 				console.log(key);
@@ -222,6 +259,7 @@
 			this.contLinhasApagadas = 0;
 			this.campo = new Array();
 			this.fila = new Array();
+			this.dados = new Array();
 		// procedimentos
 		this.ini = function (){ // zerar tudo
 			for(let k=0 ; k < this.alt ; k++){
@@ -240,6 +278,7 @@
 			this.prox();
 			if (this.campo[this.l+2][this.c] != 0) {
 				alert('fim de jogo');
+				this.recorde();
 				//this.ini();
 				this.tempo = 100000;
 			}
@@ -1456,7 +1495,65 @@
 				}
 			}
 		}
-	}	
+		this.placar = function(){
+			  var xhttp = new XMLHttpRequest();
+			  xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+			     //document.getElementById("placar").innerHTML = this.responseText;
+			     let linhas = this.responseText.split('=>');
+			     for (let i = 0; i < linhas.length; i++) {
+			     	let dado = linhas[i].split('->');
+			     	t.dados[i] = new Array(); // muito cuidado pois o this.dados aqui deu bug!!!
+			     	t.dados[i]['nome'] = dado[0];
+			     	t.dados[i]['pontos'] = dado[1];
+			     }
+			     //
+			     document.getElementById("placar").innerHTML = '';
+			     for (let k = 0; k < t.dados.length; k++) {
+			     	document.getElementById("placar").innerHTML += '<i>'+t.dados[k]['nome']+'</i><strong>'+t.dados[k]['pontos']+'</strong><br />';
+			     }
+			     //document.getElementById("placar").innerHTML += '<table>';
+			    }
+			  };
+			  xhttp.open("GET", "placar.txt", true);
+			  xhttp.send();
+		}
+		this.recorde = function(){
+			let novoRecorde = false;
+			let novoRecordeIndex = 10;
+			for (let k = 0; k < this.dados.length; k++) {
+				if (parseInt(this.dados[k]['pontos']) < this.contLinhasApagadas) {
+					novoRecorde = true;
+					novoRecordeIndex = k;
+					break;
+				}
+			}
+			if (novoRecorde) {
+				alert('novo recorde '+novoRecordeIndex+' lugar');
+				for (let k = this.dados.length-1; k >= novoRecordeIndex ; k--){
+					if (k > novoRecordeIndex) {
+						this.dados[k]['nome'] = this.dados[k-1]['nome'];
+						this.dados[k]['pontos'] = this.dados[k-1]['pontos'];
+					}else{
+						let novoNome = prompt('digite seu nome', 'entre com seu nome aqui...');
+						this.dados[k]['nome'] = novoNome;
+						this.dados[k]['pontos'] = this.contLinhasApagadas;
+					}
+				}
+				//salvar no placar.txt o Array this.dados 
+				var xhttp = new XMLHttpRequest();
+				xhttp.open("POST", "placar.php", true);
+				xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				xhttp.send("salvar="+this.dados[0]['nome']+'->'+this.dados[0]['pontos']+'=>'+this.dados[1]['nome']+'->'+this.dados[1]['pontos']+'=>'+this.dados[2]['nome']+'->'+this.dados[2]['pontos']+'=>'+this.dados[3]['nome']+'->'+this.dados[3]['pontos']+'=>'+this.dados[4]['nome']+'->'+this.dados[4]['pontos']);
+				//imprime
+				document.getElementById("placar").innerHTML = '';
+				 for (let k = 0; k < t.dados.length; k++) {
+			     	document.getElementById("placar").innerHTML += '<i>'+t.dados[k]['nome']+'</i><strong>'+t.dados[k]['pontos']+'</strong><br />';
+			     }
+			}
+			
+		}
+	}
 </script>
 </body>
 </html>
